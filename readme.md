@@ -29,6 +29,7 @@ export OS_IMAGE_API_VERSION=2
 ```
 
 ## Chạy
+- Đặt trong node controller
 - Đưa toàn bộ file trong thư mục vào /etc/ha-vm/
 - Tạo kịch bản compute down trong <ha-vm>/zone/available/<tên compute> (VD: compute01)
 - Add crontab như mẫu 
