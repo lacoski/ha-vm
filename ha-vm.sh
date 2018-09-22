@@ -32,18 +32,40 @@ LIST_COM_DOWN=`openstack compute service list --service nova-compute | awk '{pri
 
 if [ -z "$LIST_COM_DOWN" ]
 then
-    # If no service compute down, skip evacuate
-    echo "[${green} Notification ${reset}] State computes OK!"
-    message="State computes OK!"
+    # If no service compute down, skip evacuate    
+    message="[${green} Notification ${reset}] State computes OK!"
     echo $message
     HA_LOG_script $message
+
     rm -rf ${PROCESS}
     exit 0
 else
     # If yes, check evacuate
-    message="[${red} Notification ${reset}] Something wrong, evacuate Compute node"
+    message="[${red} Notification ${reset}] Something wrong, wait check service Compute node"
     echo $message
     HA_LOG_script $message
+
+    # Wait and recheck nova service
+    message="[${red} Notification ${reset}] Wait 120s for nova-compute update state"
+    echo $message
+    HA_LOG_script $message
+
+    sleep 2m
+
+    LIST_COM_DOWN=`openstack compute service list --service nova-compute | awk '{print $6,$12}' | grep down | awk '{ print $1 }'`
+    if [ -z "$LIST_COM_DOWN" ]
+    then      
+        message="[${green} Notification ${reset}] State nova-compute ok!"
+        echo $message
+        HA_LOG_script $message
+        rm -rf ${PROCESS}
+        exit 0                  
+    else
+        message="[${red} Notification ${reset}] Service nova-compute still down!"
+        echo $message
+        HA_LOG_script $message
+    fi
+
 fi
 
 message="[${red} Notification ${reset}] Process compute down $LIST_COM_DOWN"
